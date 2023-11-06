@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>TeamsJSBlazor</title>
+    <base href="/" />
+    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/app.css" rel="stylesheet" />
+    <link href="TeamsJSBlazor.styles.css" rel="stylesheet" />
+</head>
+
+<body>
+    <div id="app">Loading...</div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="scripts/teams/dist/MicrosoftTeams.js"></script>
+
+
+    <script>
+        var _context;
+
+        function InitializeTeamsContext(instance, callbackMethod) {
+            console.log("InitializeTeamsContext called...");
+            try {
+                // Initialize SDK
+                microsoftTeams.initialize();
+                // Fetch MS-Teams Context and store it in the _context variable
+                microsoftTeams.getContext((context, error) => {
+                    _context = context;
+                });
+            }
+            catch (err) {
+                instance.invokeMethod(callbackMethod, err);
+                alert(err.message);
+            }
+        }
+
+        function GetUPN(instance, callbackMethod) {
+            try {
+                console.log("GetUPNCalled");
+                // Get User Principal Name
+                let userName = Object.keys(_context).length > 0 ? _context['upn'] : "";
+                return userName;
+            }
+            catch (err) {
+                instance.invokeMethod(callbackMethod, err);
+            }
+        }
+
+        function getClientSideToken(instance, callbackMethod) {
+            try {
+                return new Promise((resolve, reject) => {
+                    console.log("Get auth token from Microsoft Teams");
+                    microsoftTeams.authentication.getAuthToken({
+                        successCallback: (result) => {
+                            resolve(result);
+                        },
+                        failureCallback: function (error) {
+                            alert(error);
+                            reject("Error getting token: " + error);
+                        }
+                    });
+                });
+            }
+            catch (err) {
+                instance.invokeMethod(callbackMethod, err);
+                alert(err.message);
+            }
+        }
+    </script>
+
+</body>
+
+</html>

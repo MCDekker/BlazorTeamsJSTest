@@ -1,0 +1,50 @@
+﻿@page "/"
+@inject IJSRuntime JSRuntime;
+ 
+<h1>Counter</h1>
+ 
+<p>Current User: @userName</p>
+<p>AuthToken: @authToken</p>
+ 
+<button class="btn btn-primary" @onclick="InitTeams">Init Teams</button>
+<button class="btn btn-primary" @onclick="GetUserName">Get UserName</button>
+<button class="btn btn-light" @onclick="GetAuthToken">Get Auth-Token</button>
+
+<pre>@logging</pre>
+
+@code {
+    private string userName = string.Empty;
+    private string authToken = string.Empty;
+    string logging = "";
+    private DotNetObjectReference<Index>? objRef { get; set; }
+
+    protected override void OnInitialized()
+    {
+        objRef = DotNetObjectReference.Create(this);
+        base.OnInitialized();
+    }
+
+    private async Task InitTeams()
+    {
+        LogMessage("Starting InitTeams");
+        await JSRuntime.InvokeVoidAsync("InitializeTeamsContext", objRef, "LogMessage");
+        LogMessage("Finished InitTeams");
+    }
+
+    private async Task GetUserName()
+    {
+        userName = await JSRuntime.InvokeAsync<string>("GetUPN", objRef, "LogMessage");
+    }
+
+    private async Task GetAuthToken()
+    {
+        LogMessage("Starting GetAuthToken");
+        authToken = await JSRuntime.InvokeAsync<string>("getClientSideToken", objRef, "LogMessage");
+    }
+
+    [JSInvokable]
+    public void LogMessage(string message)
+    {
+        logging += "\n" + message;
+    }
+}
